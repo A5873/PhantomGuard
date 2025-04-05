@@ -1,0 +1,40 @@
+# Core dependencies
+pathlib>=1.0.1
+typing-extensions>=4.0.0
+psutil>=5.9.0
+jinja2>=3.0.0
+distro>=1.7.0
+argparse>=1.4.0
+pathlib2>=2.3.7; python_version < '3.6'
+pyyaml>=6.0.0
+tqdm>=4.64.0
+
+# System security analysis
+procfs>=0.7.1
+pyudev>=0.24.0
+
+# Network analysis dependencies
+python-nmap>=0.7.1
+dpkt>=1.9.7
+scapy>=2.4.5; sys_platform != 'win32'
+
+# File system monitoring
+watchdog>=2.1.9
+
+# Optional dependencies for enhanced functionality
+# volatility3>=2.0.0       # For memory forensics
+# docker>=5.0.0            # For container security analysis
+# yara-python>=4.2.0       # For malware pattern detection
+# pefile>=2022.5.30        # For PE file analysis
+# elasticsearch>=8.3.1     # For exporting data to Elasticsearch
+# pymongo>=4.2.0           # For MongoDB integration
+# requests>=2.28.1         # For web API integrations
+
+# Security features
+cryptography>=37.0.0
+python-slugify>=6.1.2      # For safe filename generation
+
+# Color and formatting in terminal output
+colorama>=0.4.5
+rich>=12.5.1               # Alternative to colorama for enhanced terminal output
+
