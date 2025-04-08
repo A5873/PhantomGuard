@@ -1,6 +1,6 @@
-# Rootkit Hunter
+# PhantomGuard
 
-Advanced security analysis tool for Linux systems with comprehensive rootkit detection, memory forensics, and system security analysis capabilities.
+Advanced security analysis tool for Linux systems with comprehensive security detection, memory forensics, and system security analysis capabilities.
 
 ![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -8,9 +8,9 @@ Advanced security analysis tool for Linux systems with comprehensive rootkit det
 
 ## 🔍 Overview
 
-Rootkit Hunter is a powerful security analysis toolkit designed to detect rootkits, malware, and security vulnerabilities on Linux systems. It combines cutting-edge memory forensics, network traffic analysis, and system monitoring techniques to provide comprehensive security assessment capabilities.
+PhantomGuard is a powerful security analysis toolkit designed to detect threats, malware, and security vulnerabilities on Linux systems. It combines cutting-edge memory forensics, network traffic analysis, and system monitoring techniques to provide comprehensive security assessment capabilities.
 
-With its unique hybrid architecture, utilizing both Python and Rust, Rootkit Hunter delivers the perfect balance of development speed and runtime performance.
+With its unique hybrid architecture, utilizing both Python and Rust, PhantomGuard delivers the perfect balance of development speed and runtime performance.
 
 ## ✨ Features
 
@@ -49,10 +49,10 @@ With its unique hybrid architecture, utilizing both Python and Rust, Rootkit Hun
 
 ```bash
 # Install from PyPI
-pip install rootkithunter
+pip install phantomguard
 
 # To install with full features (recommended)
-pip install rootkithunter[full]
+pip install phantomguard[full]
 ```
 
 ### Installation with Rust Extensions
@@ -64,18 +64,18 @@ For maximum performance, install with Rust components:
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Install with Rust performance extensions
-pip install rootkithunter[rust]
+pip install phantomguard[rust]
 
 # Install with all features and Rust extensions
-pip install rootkithunter[full,rust]
+pip install phantomguard[full,rust]
 ```
 
 ### Installation from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/example/rootkithunter.git
-cd rootkithunter
+git clone https://github.com/example/phantomguard.git
+cd phantomguard
 
 # Install in development mode
 pip install -e .
@@ -90,43 +90,43 @@ pip install -e ".[dev,rust]"
 
 ```bash
 # Run a full security scan
-rootkithunter scan
+phantomguard scan
 
 # Analyze system memory
-rootkithunter memory
+phantomguard memory
 
 # Inspect running processes
-rootkithunter processes
+phantomguard processes
 
 # Monitor network traffic
-rootkithunter network
+phantomguard network
 
 # Analyze system calls
-rootkithunter syscalls
+phantomguard syscalls
 ```
 
 ### Command Options
 
 ```bash
 # Show help
-rootkithunter --help
-rootkithunter scan --help
+phantomguard --help
+phantomguard scan --help
 
 # Save scan results to a file
-rootkithunter scan --output security_report.txt
+phantomguard scan --output security_report.txt
 
 # Save results in JSON format
-rootkithunter scan --format json --output security_report.json
+phantomguard scan --format json --output security_report.json
 
 # Enable verbose output
-rootkithunter scan --verbose
+phantomguard scan --verbose
 ```
 
 ### Sample Output
 
 ```
 ╔══════════════════════════════════════════════════════╗
-║                   ROOTKIT HUNTER                     ║
+║                   PHANTOM GUARD                     ║
 ╚══════════════════════════════════════════════════════╝
 
 [+] Scanning system memory...
@@ -153,10 +153,10 @@ Comprehensive report saved to security_report.txt
 You can also use Rootkit Hunter programmatically in your Python code:
 
 ```python
-from rootkithunter.core import RustyAnalyzer
+from phantomguard.core import SecurityAnalyzer
 
 # Initialize the analyzer
-analyzer = RustyAnalyzer(debug=True)
+analyzer = SecurityAnalyzer(debug=True)
 
 # Perform memory analysis
 memory_threats = analyzer.scan_memory()
@@ -197,8 +197,8 @@ print(f"Found {len(results['syscall_anomalies'])} syscall anomalies")
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/example/rootkithunter.git
-   cd rootkithunter
+   git clone https://github.com/example/phantomguard.git
+   cd phantomguard
    ```
 
 2. **Create and activate a virtual environment**:
@@ -224,17 +224,17 @@ print(f"Found {len(results['syscall_anomalies'])} syscall anomalies")
 pytest
 
 # Run with coverage
-pytest --cov=rootkithunter
+pytest --cov=phantomguard
 
 # Run specific test file
-pytest tests/python/test_rusty_analyzer.py
+pytest tests/python/test_security_analyzer.py
 ```
 
 ### Building Rust Components
 
 ```bash
 # Navigate to the Rust directory
-cd rust/rootkithunter
+cd rust/phantomguard
 
 # Build the Rust library
 cargo build
@@ -292,8 +292,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📚 Documentation
 
 For detailed documentation, see:
-- [Full Documentation](https://rootkithunter.readthedocs.io/)
-- [API Reference](https://rootkithunter.readthedocs.io/en/latest/api.html)
+- [Full Documentation](https://phantomguard.readthedocs.io/)
+- [API Reference](https://phantomguard.readthedocs.io/en/latest/api.html)
 - [Development Guide](DEVELOPMENT.md)
 
 ## ⚠️ Disclaimer

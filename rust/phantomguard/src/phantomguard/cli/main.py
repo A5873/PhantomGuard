@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Command Line Interface for Rootkit Hunter.
+Command Line Interface for PhantomGuard.
 
 This module provides a command-line interface for running security
 analyses and generating reports.
@@ -26,19 +26,19 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from rootkithunter.core import RustyAnalyzer
+from phantomguard.core import RustyAnalyzer
 
 # Initialize Rich console for pretty output
 console = Console()
 
 
 def print_banner() -> None:
-    """Print the Rootkit Hunter banner."""
+    """Print the PhantomGuard banner."""
     console.print(
         "\n[bold blue]╔═══════════════════════════════════════════════════════════╗[/]"
     )
     console.print(
-        "[bold blue]║                   [bold white]ROOTKIT HUNTER[/]                     ║[/]"
+        "[bold blue]║                   [bold white]PHANTOM GUARD[/]                      ║[/]"
     )
     console.print(
         "[bold blue]╚═══════════════════════════════════════════════════════════╝[/]\n"
@@ -169,8 +169,8 @@ def save_report(
     else:
         # Save as text
         with open(output_file, "w") as f:
-            f.write("ROOTKIT HUNTER SECURITY REPORT\n")
-            f.write("===============================\n\n")
+            f.write("PHANTOM GUARD SECURITY REPORT\n")
+            f.write("===========================\n\n")
             f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"Hostname: {os.uname().nodename}\n\n")
 
@@ -202,7 +202,7 @@ def save_report(
 @click.version_option(version="0.1.0")
 def cli():
     """
-    Rootkit Hunter - Advanced Security Analysis Tool.
+    PhantomGuard - Advanced Security Analysis Tool.
 
     This tool provides comprehensive security analysis capabilities,
     including rootkit detection, memory forensics, and system security checks.

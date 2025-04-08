@@ -26,4 +26,4 @@ jobs:
         pip install -e .
     - name: Run tests
       run: |
-        pytest --cov=rootkithunter tests/
+        pytest --cov=phantomguard tests/

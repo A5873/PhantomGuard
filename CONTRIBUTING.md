@@ -1,6 +1,6 @@
-# Contributing to Rootkit Hunter
+# Contributing to PhantomGuard
 
-Thank you for considering contributing to the Rootkit Hunter project! This document provides guidelines and instructions for contributing.
+Thank you for considering contributing to the PhantomGuard project! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -68,7 +68,7 @@ pytest
 
 To run tests with coverage:
 ```bash
-pytest --cov=rootkithunter
+pytest --cov=phantomguard
 ```
 
 ## Code Style

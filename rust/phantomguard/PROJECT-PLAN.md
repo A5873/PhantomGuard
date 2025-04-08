@@ -1,8 +1,8 @@
-# RootKitHunter Project Plan
+# PhantomGuard Project Plan
 
 ## 1. Project Structure Implementation
 
-### 1.1 Core Analyzers (src/rootkithunter/analyzers/)
+### 1.1 Core Analyzers (src/phantomguard/analyzers/)
 - process_analyzer.py
   * Process enumeration and analysis
   * Hidden process detection
@@ -28,24 +28,24 @@
   * Memory forensics capabilities
   * Runtime memory verification
 
-### 1.2 Core Components (src/rootkithunter/core/)
+### 1.2 Core Components (src/phantomguard/core/)
 - scanner.py: Main scanning orchestration
 - results.py: Results processing and storage
 - config.py: Configuration management
 - exceptions.py: Custom exception handling
 
-### 1.3 Utilities (src/rootkithunter/utils/)
+### 1.3 Utilities (src/phantomguard/utils/)
 - logger.py: Logging configuration
 - file_utils.py: File operations helpers
 - system_utils.py: System interaction utilities
 - hash_utils.py: Hashing and verification tools
 
-### 1.4 Reporting (src/rootkithunter/reporting/)
+### 1.4 Reporting (src/phantomguard/reporting/)
 - report_generator.py: Report creation
 - templates/: Report templates
 - formatters/: Output formatting
 
-### 1.5 CLI (src/rootkithunter/cli/)
+### 1.5 CLI (src/phantomguard/cli/)
 - main.py: Entry point
 - commands/: Individual CLI commands
 - options.py: CLI options configuration
@@ -127,7 +127,7 @@ git add .
 git commit -m "Initial project structure and configuration"
 
 # Add remote repository
-git remote add origin https://github.com/yourusername/rootkithunter.git
+git remote add origin https://github.com/yourusername/phantomguard.git
 
 # Push to main branch
 git push -u origin main

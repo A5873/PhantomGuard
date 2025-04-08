@@ -8,15 +8,15 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from rootkithunter.main import RootkitHunter, parse_args, main
+from phantomguard.main import SecurityAnalyzer, parse_args, main
 
 
-@patch('rootkithunter.main.get_system_info')
-@patch('rootkithunter.main.setup_logging')
-def test_rootkithunter_init(mock_setup_logging, mock_get_system_info, temp_dir):
-    """Test RootkitHunter initialization."""
-    # Create a hunter instance
-    hunter = RootkitHunter(
+@patch('phantomguard.main.get_system_info')
+@patch('phantomguard.main.setup_logging')
+def test_securityanalyzer_init(mock_setup_logging, mock_get_system_info, temp_dir):
+    """Test SecurityAnalyzer initialization."""
+    # Create an analyzer instance
+    analyzer = SecurityAnalyzer(
         output_dir=str(temp_dir),
         report_format="txt",
         scan_type="quick",
@@ -26,21 +26,21 @@ def test_rootkithunter_init(mock_setup_logging, mock_get_system_info, temp_dir):
     )
     
     # Check attributes
-    assert hunter.output_dir == Path(temp_dir)
-    assert hunter.report_format == "txt"
-    assert hunter.scan_type == "quick"
-    assert hunter.network_capture_time == 30
-    assert hunter.verbose is True
-    assert hunter.keep_artifacts is True
+    assert analyzer.output_dir == Path(temp_dir)
+    assert analyzer.report_format == "txt"
+    assert analyzer.scan_type == "quick"
+    assert analyzer.network_capture_time == 30
+    assert analyzer.verbose is True
+    assert analyzer.keep_artifacts is True
     
     # Check that the report file was created
-    assert hunter.report_file == Path(temp_dir) / "security_report.txt"
+    assert analyzer.report_file == Path(temp_dir) / "security_report.txt"
     
     # Verify logging was set up
     mock_setup_logging.assert_called_once()
 
 
-@patch('rootkithunter.main.get_system_info')
+@patch('phantomguard.main.get_system_info')
 def test_initialize_report_txt(mock_get_system_info, temp_dir):
     """Test report initialization with TXT format."""
     # Mock system info
@@ -49,24 +49,24 @@ def test_initialize_report_txt(mock_get_system_info, temp_dir):
         "Kernel": "5.10.0-test"
     }
     
-    # Create a hunter instance with txt report
-    hunter = RootkitHunter(
+    # Create an analyzer instance with txt report
+    analyzer = SecurityAnalyzer(
         output_dir=str(temp_dir),
         report_format="txt"
     )
     
     # Initialize the report
-    hunter._initialize_report()
+    analyzer._initialize_report()
     
     # Check that the report file exists and has content
-    assert hunter.report_file.exists()
-    content = hunter.report_file.read_text()
-    assert "Rootkit Hunter Security Report" in content
+    assert analyzer.report_file.exists()
+    content = analyzer.report_file.read_text()
+    assert "PhantomGuard Security Report" in content
     assert "OS: Linux Test" in content
     assert "Kernel: 5.10.0-test" in content
 
 
-@patch('rootkithunter.main.get_system_info')
+@patch('phantomguard.main.get_system_info')
 def test_initialize_report_html(mock_get_system_info, temp_dir):
     """Test report initialization with HTML format."""
     # Mock system info
@@ -75,24 +75,24 @@ def test_initialize_report_html(mock_get_system_info, temp_dir):
         "Kernel": "5.10.0-test"
     }
     
-    # Create a hunter instance with html report
-    hunter = RootkitHunter(
+    # Create an analyzer instance with html report
+    analyzer = SecurityAnalyzer(
         output_dir=str(temp_dir),
         report_format="html"
     )
     
     # Initialize the report
-    hunter._initialize_report()
+    analyzer._initialize_report()
     
     # Check that the report file exists and has content
-    assert hunter.report_file.exists()
-    content = hunter.report_file.read_text()
-    assert "<title>Rootkit Hunter Security Report</title>" in content
+    assert analyzer.report_file.exists()
+    content = analyzer.report_file.read_text()
+    assert "<title>PhantomGuard Security Report</title>" in content
     assert "Linux Test" in content
     assert "5.10.0-test" in content
 
 
-@patch('rootkithunter.main.get_system_info')
+@patch('phantomguard.main.get_system_info')
 def test_initialize_report_json(mock_get_system_info, temp_dir):
     """Test report initialization with JSON format."""
     # Mock system info
@@ -101,21 +101,21 @@ def test_initialize_report_json(mock_get_system_info, temp_dir):
         "Kernel": "5.10.0-test"
     }
     
-    # Create a hunter instance with json report
-    hunter = RootkitHunter(
+    # Create an analyzer instance with json report
+    analyzer = SecurityAnalyzer(
         output_dir=str(temp_dir),
         report_format="json"
     )
     
     # Initialize the report
-    hunter._initialize_report()
+    analyzer._initialize_report()
     
     # Check that the report file exists and has content
-    assert hunter.report_file.exists()
+    assert analyzer.report_file.exists()
     
     # Try to parse the json
     import json
-    report_data = json.loads(hunter.report_file.read_text())
+    report_data = json.loads(analyzer.report_file.read_text())
     assert "system_info" in report_data
     assert report_data["system_info"]["OS"] == "Linux Test"
     assert report_data["system_info"]["Kernel"] == "5.10.0-test"
@@ -123,7 +123,7 @@ def test_initialize_report_json(mock_get_system_info, temp_dir):
 
 def test_parse_args():
     """Test argument parsing."""
-    with patch('sys.argv', ['rootkithunter', 
+    with patch('sys.argv', ['phantomguard', 
                            '--output-dir', '/tmp/test',
                            '--scan-type', 'comprehensive',
                            '--format', 'html',

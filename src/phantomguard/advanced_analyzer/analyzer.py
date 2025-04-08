@@ -35,7 +35,7 @@ from typing import Dict, List, Optional, Tuple, Union, Any, Set, Callable
 
 # Import common utilities
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
-from rootkithunter.utils.common import (
+from phantomguard.utils.common import (
     Colors, print_banner, print_section, print_subsection,
     print_info, print_success, print_warning, print_error,
     run_command, command_exists, check_dependencies,

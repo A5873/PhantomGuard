@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Import the utilities module
-from rootkithunter.utils.common import (
+from phantomguard.utils.common import (
     command_exists, run_command, is_root, get_system_info,
     print_banner, print_info, print_error, print_warning, print_success,
     ensure_temp_dir, cleanup_temp_dir
@@ -85,7 +85,7 @@ def test_get_system_info(mock_memory, mock_processor, mock_release,
 
 def test_temp_dir_functions(temp_dir):
     """Test temp directory creation and cleanup functions."""
-    with patch('rootkithunter.utils.common.TEMP_DIR', temp_dir):
+    with patch('phantomguard.utils.common.TEMP_DIR', temp_dir):
         # Test ensuring temp directory
         test_dir = ensure_temp_dir()
         assert test_dir.exists()

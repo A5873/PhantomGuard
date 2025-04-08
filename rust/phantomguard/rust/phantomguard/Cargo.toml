@@ -1,9 +1,9 @@
 [package]
-name = "rootkithunter-rs"
+name = "phantomguard-rs"
 version = "0.1.0"
 edition = "2021"
 authors = ["Security Tools Team <security@example.com>"]
-description = "Performance-critical components for the Rootkit Hunter tool"
+description = "Performance-critical components for the PhantomGuard tool"
 
 [dependencies]
 tokio = { version = "1.28", features = ["full"] }

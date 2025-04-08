@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="rootkithunter",
+    name="phantomguard",
     version="0.1.0",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
@@ -25,7 +25,7 @@ setup(
     python_requires=">=3.7",
     entry_points={
         "console_scripts": [
-            "rootkithunter=rootkithunter.cli:main",
+            "phantomguard=phantomguard.cli:main",
         ],
     },
 )

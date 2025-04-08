@@ -5,10 +5,10 @@ This example demonstrates how to use the Rust components from Python code for op
 ## Basic Integration Example
 
 ```python
-from rootkithunter.core import RustyAnalyzer
+from phantomguard.core import SecurityAnalyzer
 
 def main():
-    analyzer = RustyAnalyzer()
+    analyzer = SecurityAnalyzer()
 
     # Memory analysis (Rust)
     memory_threats = analyzer.scan_memory()
@@ -27,14 +27,14 @@ def main():
 
 ### Python Side
 
-The `RustyAnalyzer` class provides a Python-friendly interface to the Rust components:
+The `SecurityAnalyzer` class provides a Python-friendly interface to the Rust components:
 
 ```python
-# rootkithunter/core/rusty_analyzer.py
+# phantomguard/core/security_analyzer.py
 from typing import List, Dict, Any
-import rootkithunter_rs  # Rust bindings
+import phantomguard_rs  # Rust bindings
 
-class RustyAnalyzer:
+class SecurityAnalyzer:
     """
     High-performance security analyzer using Rust components.
     """
@@ -47,15 +47,6 @@ class RustyAnalyzer:
             List of detected memory threats
         """
         # Call the Rust function through bindings
-        return rootkithunter_rs.memory.analyze_memory()
-
-    def inspect_processes(self) -> List[Dict[str, Any]]:
-        """
-        Inspect running processes using Rust implementation.
-
-        Returns:
-            List of suspicious processes
-        """
         return rootkithunter_rs.process.analyze_processes()
 
     def monitor_network(self) -> List[Dict[str, Any]]:

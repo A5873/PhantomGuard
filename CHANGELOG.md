@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Project renamed from "Rootkit Hunter" to "PhantomGuard"
+- Updated all documentation and code references to reflect new name
+
 ### Added
 - Security policy document
 - GitHub CI workflow configuration
@@ -16,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-04-05
 
 ### Added
-- Initial release of Rootkit Hunter
+- Initial release of PhantomGuard
 - Memory forensics analysis
 - Rootkit detection capabilities
 - Network traffic analysis

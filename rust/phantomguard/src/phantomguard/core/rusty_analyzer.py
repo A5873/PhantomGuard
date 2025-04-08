@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RustyAnalyzer: Python interface to Rust-based security analysis components.
+RustyAnalyzer: Python interface to PhantomGuard's Rust-based security analysis components.
 
 This module provides a high-level Python interface to the performance-critical
 security analysis components implemented in Rust.
@@ -102,7 +102,7 @@ class RustyAnalyzer:
         self._ensure_memory_analyzer()
 
         # Placeholder implementation until Rust bindings are available
-        # In real implementation, this would call: return rootkithunter_rs.memory.analyze_memory()
+        # In real implementation, this would call: return phantomguard_rs.memory.analyze_memory()
         return [
             {
                 "type": "memory_injection",
@@ -129,7 +129,7 @@ class RustyAnalyzer:
         self._ensure_process_analyzer()
 
         # Placeholder implementation until Rust bindings are available
-        # In real implementation, this would call: return rootkithunter_rs.process.analyze_processes()
+        # In real implementation, this would call: return phantomguard_rs.process.analyze_processes()
         return [
             {
                 "pid": 1234,
@@ -156,7 +156,7 @@ class RustyAnalyzer:
         self._ensure_network_analyzer()
 
         # Placeholder implementation until Rust bindings are available
-        # In real implementation, this would call: return rootkithunter_rs.network.analyze_network()
+        # In real implementation, this would call: return phantomguard_rs.network.analyze_network()
         return [
             {
                 "source_ip": "192.168.1.100",
@@ -182,7 +182,7 @@ class RustyAnalyzer:
             with metadata about the detected issue.
         """
         # Placeholder implementation until Rust bindings are available
-        # In real implementation, this would call: return rootkithunter_rs.syscall.analyze_syscalls()
+        # In real implementation, this would call: return phantomguard_rs.syscall.analyze_syscalls()
         return [
             {
                 "syscall": "ptrace",

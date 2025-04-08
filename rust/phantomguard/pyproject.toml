@@ -3,9 +3,9 @@ requires = ["setuptools>=65.5.1", "wheel>=0.40.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rootkithunter"
+name = "phantomguard"
 version = "0.1.0"
-description = "Advanced security analysis tool with hybrid Python-Rust implementation"
+description = "Advanced security analysis tool for system security and threat detection"
 readme = "README.md"
 requires-python = ">=3.7"
 license = {text = "MIT"}
@@ -62,13 +62,13 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/rootkithunter"
-Documentation = "https://rootkithunter.readthedocs.io/"
-Repository = "https://github.com/example/rootkithunter.git"
-Issues = "https://github.com/example/rootkithunter/issues"
+Homepage = "https://github.com/example/phantomguard"
+Documentation = "https://phantomguard.readthedocs.io/"
+Repository = "https://github.com/example/phantomguard.git"
+Issues = "https://github.com/example/phantomguard/issues"
 
 [project.scripts]
-rootkithunter = "rootkithunter.cli.main:main"
+phantomguard = "phantomguard.cli.main:main"
 
 [tool.black]
 line-length = 88
@@ -92,7 +92,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 88
-known_first_party = ["rootkithunter"]
+known_first_party = ["phantomguard"]
 known_third_party = ["click", "rich", "pytest"]
 
 [tool.mypy]
@@ -105,5 +105,5 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --cov=rootkithunter"
+addopts = "-ra -q --cov=phantomguard"
 testpaths = ["tests"]
