@@ -1,13 +1,13 @@
 ```
- ╔═══════════════════════════════════════════╗
- ║ ██████╗ ██╗  ██╗ █████╗ ███╗   ██╗████████║
- ║ ██╔══██╗██║  ██║██╔══██╗████╗  ██║╚══██╔══║
- ║ ██████╔╝███████║███████║██╔██╗ ██║   ██║  ║
- ║ ██╔═══╝ ██╔══██║██╔══██║██║╚██╗██║   ██║  ║ 
- ║ ██║     ██║  ██║██║  ██║██║ ╚████║   ██║  ║
- ║ ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝  ║
- ╚═══════════════╗ GUARD ╔═══════════════════╝
-                 ╚═══════╝
+ ╔═══════════════════════════════════════════════════════╗
+ ║ ██████╗ ██╗  ██╗ █████╗ ███╗   ██╗████████╗ ██████╗ ███╗   ███╗║
+ ║ ██╔══██╗██║  ██║██╔══██╗████╗  ██║╚══██╔══╝██╔═══██╗████╗ ████║║
+ ║ ██████╔╝███████║███████║██╔██╗ ██║   ██║   ██║   ██║██╔████╔██║║
+ ║ ██╔═══╝ ██╔══██║██╔══██║██║╚██╗██║   ██║   ██║   ██║██║╚██╔╝██║║ 
+ ║ ██║     ██║  ██║██║  ██║██║ ╚████║   ██║   ╚██████╔╝██║ ╚═╝ ██║║
+ ║ ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝║
+ ╚═══════════════════════╗ GUARD ╔═══════════════════════════════╝
+                           ╚═══════╝
 ```
 
 # PhantomGuard
@@ -37,8 +37,19 @@ See [RUST.md](RUST.md) for details on the Rust implementation plans.
 
 ## Installation
 
+⚠️ **Note**: PhantomGuard is currently in development and not yet available on PyPI.
+
 ```bash
-pip install phantomguard
+# Clone the repository
+git clone https://github.com/username/phantomguard.git
+cd phantomguard
+
+# Create a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+
+# Install in development mode
+pip install -e '.[dev]'
 ```
 
 ## Usage
