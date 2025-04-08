@@ -337,7 +337,7 @@ class PhantomGuard:
             int: Exit code (0 for success, non-zero for errors)
         """
         try:
-            print_banner("PHANTOM GUARD")
+            print_banner("PHANTOMGUARD")
             print_info(f"Starting {self.scan_type} security scan...")
             print_info(f"Output directory: {self.output_dir}")
             

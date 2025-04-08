@@ -40,7 +40,7 @@ class Colors:
     NC = '\033[0m'  # No Color
 
 # Create temporary directory for tool operations
-TEMP_DIR = Path(tempfile.gettempdir()) / f"rootkithunter_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+TEMP_DIR = Path(tempfile.gettempdir()) / f"phantomguard_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
 
 def ensure_temp_dir() -> Path:
     """
@@ -335,7 +335,7 @@ def setup_logging(log_file: Optional[str] = None, level: int = logging.INFO) -> 
 if __name__ == "__main__":
     # Example usage when run directly
     setup_logging()
-    print_banner("ROOTKIT HUNTER UTILITIES")
+    print_banner("PHANTOMGUARD UTILITIES")
     print_section("System Information")
     
     system_info = get_system_info()
