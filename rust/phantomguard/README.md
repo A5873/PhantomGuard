@@ -45,37 +45,16 @@ With its unique hybrid architecture, utilizing both Python and Rust, PhantomGuar
 
 ## 🚀 Installation
 
-### Basic Installation
+### Installation
 
-```bash
-# Install from PyPI
-pip install phantomguard
-
-# To install with full features (recommended)
-pip install phantomguard[full]
-```
-
-### Installation with Rust Extensions
-
-For maximum performance, install with Rust components:
-
-```bash
-# Ensure Rust is installed (https://rustup.rs/)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-# Install with Rust performance extensions
-pip install phantomguard[rust]
-
-# Install with all features and Rust extensions
-pip install phantomguard[full,rust]
-```
+PhantomGuard is currently under development and not yet available on PyPI. The recommended way to install is from source:
 
 ### Installation from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/example/phantomguard.git
-cd phantomguard
+git clone https://github.com/A5873/PhantomGuard.git
+cd PhantomGuard
 
 # Install in development mode
 pip install -e .
@@ -126,7 +105,7 @@ phantomguard scan --verbose
 
 ```
 ╔══════════════════════════════════════════════════════╗
-║                   PHANTOM GUARD                     ║
+║                    PHANTOM GUARD                      ║
 ╚══════════════════════════════════════════════════════╝
 
 [+] Scanning system memory...
@@ -150,7 +129,7 @@ Comprehensive report saved to security_report.txt
 
 ### Python API Usage
 
-You can also use Rootkit Hunter programmatically in your Python code:
+You can also use PhantomGuard programmatically in your Python code:
 
 ```python
 from phantomguard.core import SecurityAnalyzer
@@ -197,8 +176,8 @@ print(f"Found {len(results['syscall_anomalies'])} syscall anomalies")
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/example/phantomguard.git
-   cd phantomguard
+   git clone https://github.com/A5873/PhantomGuard.git
+   cd PhantomGuard
    ```
 
 2. **Create and activate a virtual environment**:
