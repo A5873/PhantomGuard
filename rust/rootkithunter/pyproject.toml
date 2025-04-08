@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=65.5.1", "wheel>=0.40.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rootkithunter"
+version = "0.1.0"
+description = "Advanced security analysis tool with hybrid Python-Rust implementation"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Security Tools Team", email = "security@example.com"}
+]
+
+dependencies = [
+    "click>=8.1.3",
+    "rich>=12.5.1",
+    "colorama>=0.4.6",
+    "psutil>=5.9.4",
+    "tabulate>=0.9.0",
+    "pyyaml>=6.0",
+    "typing-extensions>=4.4.0",
+    "importlib-metadata>=5.1.0",
+    "procfs>=1.0.1",
+    "pyudev>=0.24.0",
+    "netifaces>=0.11.0",
+    "python-nmap>=0.7.1",
+    "scapy>=2.5.0",
+    "cryptography>=38.0.4",
+    "python-slugify>=7.0.0",
+    "jinja2>=3.1.2",
+    "markdown>=3.4.1",
+]
+
+[project.optional-dependencies]
+rust = [
+    "maturin>=0.14.15",
+    "setuptools-rust>=1.5.2"
+]
+
+full = [
+    "yara-python>=4.2.3",
+    "docker>=6.0.1",
+    "volatility3>=2.4.1",
+    "reportlab>=3.6.12"
+]
+
+dev = [
+    "pytest>=7.2.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.12.0",
+    "isort>=5.11.4",
+    "flake8>=6.0.0",
+    "mypy>=0.991",
+    "pre-commit>=2.21.0",
+    "sphinx>=5.3.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.19.5",
+    "build>=0.10.0",
+    "twine>=4.0.2"
+]
+
+[project.urls]
+Homepage = "https://github.com/example/rootkithunter"
+Documentation = "https://rootkithunter.readthedocs.io/"
+Repository = "https://github.com/example/rootkithunter.git"
+Issues = "https://github.com/example/rootkithunter/issues"
+
+[project.scripts]
+rootkithunter = "rootkithunter.cli.main:main"
+
+[tool.black]
+line-length = 88
+target-version = ["py37"]
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+known_first_party = ["rootkithunter"]
+known_third_party = ["click", "rich", "pytest"]
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov=rootkithunter"
+testpaths = ["tests"]

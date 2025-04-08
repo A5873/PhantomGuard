@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Rootkit Hunter - Advanced Security Analysis Tool
+PhantomGuard - Advanced Security Analysis Tool
 
 This tool provides comprehensive security scanning capabilities including:
 - System security checks
@@ -11,7 +11,7 @@ This tool provides comprehensive security scanning capabilities including:
 - Container security analysis
 
 Usage:
-    python -m rootkithunter.main [options]
+    python -m phantomguard.main [options]
 """
 
 import os
@@ -24,11 +24,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 # Import analyzer modules
-from rootkithunter.advanced_analyzer.analyzer import (
+from phantomguard.advanced_analyzer.analyzer import (
     MemoryAnalyzer, NetworkAnalyzer, RootkitDetector, ContainerAnalyzer, 
     SecurityAnalyzer, AnalysisStatus
 )
-from rootkithunter.utils.common import (
+from phantomguard.utils.common import (
     Colors, print_banner, print_section, print_subsection,
     print_info, print_success, print_warning, print_error,
     get_system_info, is_root, require_root, setup_logging,
@@ -36,8 +36,8 @@ from rootkithunter.utils.common import (
 )
 
 
-class RootkitHunter:
-    """Main class for the Rootkit Hunter tool."""
+class PhantomGuard:
+    """Main class for the PhantomGuard tool."""
     
     def __init__(
         self,
@@ -49,7 +49,7 @@ class RootkitHunter:
         keep_artifacts: bool = False
     ):
         """
-        Initialize the Rootkit Hunter tool.
+        Initialize the PhantomGuard tool.
         
         Args:
             output_dir: Directory to save reports and artifacts
@@ -71,14 +71,14 @@ class RootkitHunter:
             self.output_dir = Path(output_dir)
         else:
             timestamp = self.start_time.strftime("%Y%m%d_%H%M%S")
-            self.output_dir = Path.home() / f"rootkithunter_report_{timestamp}"
+            self.output_dir = Path.home() / f"phantomguard_report_{timestamp}"
             
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.report_file = self.output_dir / f"security_report.{self.report_format}"
         
         # Set up logging
         log_level = logging.DEBUG if verbose else logging.INFO
-        log_file = self.output_dir / "rootkithunter.log"
+        log_file = self.output_dir / "phantomguard.log"
         setup_logging(str(log_file), log_level)
         
         # Initialize results
@@ -96,7 +96,7 @@ class RootkitHunter:
         
         if self.report_format == "txt":
             with open(self.report_file, "w") as f:
-                f.write("# Rootkit Hunter Security Report\n\n")
+                f.write("# PhantomGuard Security Report\n\n")
                 f.write(f"Generated: {self.start_time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
                 
                 f.write("## System Information\n\n")
@@ -109,7 +109,7 @@ class RootkitHunter:
             html_content = f"""<!DOCTYPE html>
 <html>
 <head>
-    <title>Rootkit Hunter Security Report</title>
+    <title>PhantomGuard Security Report</title>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 20px; }}
         h1, h2, h3 {{ color: #2c3e50; }}
@@ -124,7 +124,7 @@ class RootkitHunter:
     </style>
 </head>
 <body>
-    <h1>Rootkit Hunter Security Report</h1>
+    <h1>PhantomGuard Security Report</h1>
     <p>Generated: {self.start_time.strftime('%Y-%m-%d %H:%M:%S')}</p>
     
     <h2>System Information</h2>
@@ -337,7 +337,7 @@ class RootkitHunter:
             int: Exit code (0 for success, non-zero for errors)
         """
         try:
-            print_banner("ROOTKIT HUNTER")
+            print_banner("PHANTOM GUARD")
             print_info(f"Starting {self.scan_type} security scan...")
             print_info(f"Output directory: {self.output_dir}")
             
@@ -398,7 +398,7 @@ def parse_args() -> argparse.Namespace:
         argparse.Namespace: Parsed arguments
     """
     parser = argparse.ArgumentParser(
-        description="Rootkit Hunter - Advanced Security Analysis Tool",
+        description="PhantomGuard - Advanced Security Analysis Tool",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     
@@ -465,7 +465,7 @@ def main() -> int:
         require_root()
     
     # Run security scan
-    scanner = RootkitHunter(
+    scanner = PhantomGuard(
         output_dir=args.output_dir,
         report_format=args.format,
         scan_type=args.scan_type,

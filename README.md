@@ -1,7 +1,22 @@
-# Rootkit Hunter
+```
+ ╔═══════════════════════════════════════════╗
+ ║ ██████╗ ██╗  ██╗ █████╗ ███╗   ██╗████████║
+ ║ ██╔══██╗██║  ██║██╔══██╗████╗  ██║╚══██╔══║
+ ║ ██████╔╝███████║███████║██╔██╗ ██║   ██║  ║
+ ║ ██╔═══╝ ██╔══██║██╔══██║██║╚██╗██║   ██║  ║ 
+ ║ ██║     ██║  ██║██║  ██║██║ ╚████║   ██║  ║
+ ║ ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝  ║
+ ╚═══════════════╗ GUARD ╔═══════════════════╝
+                 ╚═══════╝
+```
 
-A comprehensive security analysis tool for Linux systems, implementing advanced rootkit detection, memory forensics, and system security analysis.
+# PhantomGuard
 
+PhantomGuard is a powerful security analysis toolkit that combines advanced rootkit detection, memory forensics, and system monitoring capabilities. Built with Python and Rust, it provides comprehensive protection against sophisticated threats, featuring real-time analysis, container security scanning, and network traffic monitoring.
+
+## Project Status
+
+⚠️ **Notice**: PhantomGuard is currently under active development. APIs may change, and new features are being added regularly.
 ## Features
 
 - Memory forensics and analysis
@@ -23,23 +38,23 @@ See [RUST.md](RUST.md) for details on the Rust implementation plans.
 ## Installation
 
 ```bash
-pip install rootkithunter
+pip install phantomguard
 ```
 
 ## Usage
 
 ```bash
 # Basic system scan
-rootkithunter scan
+phantomguard scan
 
 # Full security analysis
-rootkithunter analyze --full
+phantomguard analyze --full
 
 # Container security check
-rootkithunter container-scan
+phantomguard container-scan
 
 # Memory analysis
-rootkithunter memory-scan
+phantomguard memory-scan
 ```
 
 ## Development

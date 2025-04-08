@@ -10,18 +10,18 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = fh.read().splitlines()
 
 setup(
-    name="rootkithunter",
+    name="phantomguard",
     version="0.1.0",
     author="Security Tools Team",
     author_email="security@example.com",
     description="Advanced security analysis tool for rootkit detection and system security",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/example/rootkithunter",
+    url="https://github.com/example/phantomguard",
     project_urls={
-        "Bug Tracker": "https://github.com/example/rootkithunter/issues",
-        "Documentation": "https://github.com/example/rootkithunter/wiki",
-        "Source Code": "https://github.com/example/rootkithunter",
+        "Bug Tracker": "https://github.com/example/phantomguard/issues",
+        "Documentation": "https://github.com/example/phantomguard/wiki",
+        "Source Code": "https://github.com/example/phantomguard",
     },
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -56,7 +56,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "rootkithunter=rootkithunter.main:main",
+            "phantomguard=phantomguard.main:main",
         ],
     },
 )
