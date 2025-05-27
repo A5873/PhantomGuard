@@ -19,12 +19,14 @@ PhantomGuard is a powerful security analysis toolkit that combines advanced root
 ⚠️ **Notice**: PhantomGuard is currently under active development. APIs may change, and new features are being added regularly.
 ## Features
 
-- Memory forensics and analysis
-- Network traffic monitoring
-- Rootkit detection
-- Container security analysis
-- System vulnerability scanning
-- Real-time system monitoring
+- **Advanced Memory Forensics**: Deep analysis of system memory to detect malicious code injection, hidden processes, and runtime anomalies
+- **Network Security Monitoring**: Real-time traffic analysis with anomaly detection and suspicious connection identification
+- **Rootkit Detection**: Comprehensive scanning for kernel-level and user-mode rootkits with syscall hook detection
+- **Container Security**: Analysis of container images and running containers for vulnerabilities and security misconfigurations
+- **Vulnerability Management**: System-wide scanning for known vulnerabilities with CVE matching and remediation guidance
+- **Real-time System Monitoring**: Continuous monitoring with customizable alerting and automated response capabilities
+- **Multi-platform Support**: Compatible with Linux, macOS, and Windows environments
+- **Performance Optimization**: Configurable resource usage with Rust-accelerated components for high-performance environments
 
 ## Implementation
 
@@ -67,6 +69,17 @@ phantomguard container-scan
 # Memory analysis
 phantomguard memory-scan
 ```
+
+## Documentation
+
+PhantomGuard comes with comprehensive documentation to help you get the most out of the toolkit:
+
+- [API Reference](docs/API.md) - Complete reference of all PhantomGuard classes and methods
+- [Library Usage Guide](docs/LIBRARY_USAGE.md) - Practical examples and common use cases
+- [Performance Optimization](docs/PERFOMANCE.md) - Strategies for optimizing performance across different environments
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Solutions for common issues and debugging techniques
+
+For implementation details of the Rust components, see [RUST.md](RUST.md).
 
 ## Development
 
