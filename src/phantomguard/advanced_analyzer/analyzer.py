@@ -89,6 +89,145 @@ class BaseAnalyzer(ABC):
         Args:
             section_title: Title of the section
         """
+        # Determine report format based on file extension
+        report_format = "txt"  # Default format
+        if self.report_file.endswith(".json"):
+            report_format = "json"
+        elif self.report_file.endswith(".html"):
+            report_format = "html"
+            
+        if report_format == "json":
+            self._report_json(section_title)
+        elif report_format == "html":
+            self._report_html(section_title)
+        else:
+            self._report_txt(section_title)
+    
+    def _report_json(self, section_title: str) -> None:
+        """
+        Write findings to a JSON report file.
+        
+        Args:
+            section_title: Title of the section
+        """
+        import json
+        
+        try:
+            # Read the existing JSON file
+            with open(self.report_file, "r") as f:
+                try:
+                    report_data = json.load(f)
+                except json.JSONDecodeError:
+                    # If file is corrupted, start with a new report
+                    report_data = {
+                        "timestamp": datetime.now().isoformat(),
+                        "findings": []
+                    }
+            
+            # Create a section for these findings
+            findings_section = {
+                "section": section_title,
+                "items": []
+            }
+            
+            # Add all findings to this section
+            for message, status in self.findings:
+                findings_section["items"].append({
+                    "message": message,
+                    "status": status.name
+                })
+            
+            # Add summary to the section
+            statuses = [status for _, status in self.findings]
+            error_count = sum(1 for s in statuses if s == AnalysisStatus.ERROR)
+            warning_count = sum(1 for s in statuses if s == AnalysisStatus.WARNING)
+            
+            findings_section["summary"] = {
+                "error_count": error_count,
+                "warning_count": warning_count,
+                "overall_status": self.status.name
+            }
+            
+            # Add section to the report
+            if "findings" not in report_data:
+                report_data["findings"] = []
+            
+            report_data["findings"].append(findings_section)
+            
+            # Write the updated JSON back to the file
+            with open(self.report_file, "w") as f:
+                json.dump(report_data, f, indent=2)
+                
+        except Exception as e:
+            print_error(f"Error writing to JSON report: {str(e)}")
+            # Fall back to text report if JSON fails
+            with open(f"{self.report_file}.txt", "a") as f:
+                f.write(f"\n## {section_title} (JSON report failed)\n\n")
+                f.write(f"Error: {str(e)}\n")
+                for message, status in self.findings:
+                    f.write(f"- {message} ({status.name})\n")
+    
+    def _report_html(self, section_title: str) -> None:
+        """
+        Write findings to an HTML report file.
+        
+        Args:
+            section_title: Title of the section
+        """
+        # For HTML, we append to the file before the closing body and html tags
+        try:
+            with open(self.report_file, "r") as f:
+                content = f.read()
+            
+            # Remove closing tags if they exist
+            content = content.replace("</body>\n</html>", "")
+            
+            # Create HTML for findings
+            findings_html = f"<h2>{section_title}</h2>\n"
+            
+            if not self.findings:
+                findings_html += "<p>No issues found.</p>\n"
+            else:
+                findings_html += "<ul>\n"
+                for message, status in self.findings:
+                    status_class = status.name.lower()
+                    findings_html += f'<li class="{status_class}">{message}</li>\n'
+                findings_html += "</ul>\n"
+                
+                # Add summary
+                statuses = [status for _, status in self.findings]
+                error_count = sum(1 for s in statuses if s == AnalysisStatus.ERROR)
+                warning_count = sum(1 for s in statuses if s == AnalysisStatus.WARNING)
+                
+                findings_html += f"<p>Found {error_count} critical issues and {warning_count} warnings.</p>\n"
+                
+                if error_count > 0:
+                    findings_html += '<p class="error"><strong>Recommendation:</strong> Address critical issues immediately.</p>\n'
+                elif warning_count > 0:
+                    findings_html += '<p class="warning"><strong>Recommendation:</strong> Review warnings and address potential security concerns.</p>\n'
+                else:
+                    findings_html += '<p class="success">No significant issues detected.</p>\n'
+            
+            # Write updated content back to file
+            with open(self.report_file, "w") as f:
+                f.write(content + findings_html + "</body>\n</html>")
+                
+        except Exception as e:
+            print_error(f"Error writing to HTML report: {str(e)}")
+            # Fall back to text report if HTML fails
+            with open(f"{self.report_file}.txt", "a") as f:
+                f.write(f"\n## {section_title} (HTML report failed)\n\n")
+                f.write(f"Error: {str(e)}\n")
+                for message, status in self.findings:
+                    f.write(f"- {message} ({status.name})\n")
+    
+    def _report_txt(self, section_title: str) -> None:
+        """
+        Write findings to a text report file.
+        
+        Args:
+            section_title: Title of the section
+        """
         with open(self.report_file, "a") as f:
             f.write(f"\n## {section_title}\n\n")
             
@@ -242,373 +381,39 @@ class NetworkAnalyzer(BaseAnalyzer):
             
         return True  # We can still do basic network analysis
     
-    def _compare_ps_output(self) -> None:
-        """Compare output of different process listing commands to find hidden processes."""
-        print_info("Checking for hidden processes...")
-        
-        # Get processes from different sources
-        ps_cmds = [
-            ("ps aux", "ps_aux.txt"),
-            ("ps -ef", "ps_ef.txt"),
-            ("/bin/ps aux", "bin_ps_aux.txt"),
-            ("ls -la /proc/", "proc_dir.txt")
-        ]
-        
-        # Store processes from each command
-        processes = {}
-        
-        for cmd, output_file in ps_cmds:
-            returncode, stdout, _ = run_command(
-                cmd,
-                shell=True,
-                capture_output=True
-            )
-            
-            if returncode == 0 and stdout.strip():
-                output_path = self.temp_dir / output_file
-                output_path.write_text(stdout)
-                
-                # Parse process IDs
-                pids = set()
-                if "ls -la" in cmd:
-                    # Parse PIDs from /proc directory listing
-                    for line in stdout.splitlines():
-                        try:
-                            pid = line.split()[8]
-                            if pid.isdigit():
-                                pids.add(pid)
-                        except (IndexError, ValueError):
-                            pass
-                else:
-                    # Parse PIDs from ps output
-                    for line in stdout.splitlines()[1:]:  # Skip header
-                        try:
-                            fields = line.split()
-                            if len(fields) > 1:
-                                pid = fields[1]
-                                if pid.isdigit():
-                                    pids.add(pid)
-                        except (IndexError, ValueError):
-                            pass
-                
-                processes[cmd] = pids
-        
-        # Find differences - potential hidden processes
-        if len(processes) > 1:
-            for cmd1, pids1 in processes.items():
-                for cmd2, pids2 in processes.items():
-                    if cmd1 != cmd2:
-                        # Find PIDs in cmd1 but not in cmd2
-                        hidden = pids1 - pids2
-                        if hidden:
-                            self.add_finding(
-                                f"Found {len(hidden)} processes visible to '{cmd1}' but hidden from '{cmd2}': {', '.join(sorted(hidden))}",
-                                AnalysisStatus.ERROR
-                            )
-    
-    def _check_for_known_rootkits(self) -> None:
-        """Check for known rootkit files and signatures."""
-        print_info("Checking for known rootkit files and signatures...")
-        
-        # Common rootkit files and directories
-        suspicious_paths = [
-            "/dev/.hidedrootkit",
-            "/dev/.hiddenroot",
-            "/dev/.udev",
-            "/dev/.ps",
-            "/dev/.pstree", 
-            "/dev/.lsof",
-            "/dev/.lsof",
-            "/dev/shm/.pulse", 
-            "/usr/share/.sshd",
-            "/usr/bin/.sshd",
-            "/lib/modules/*/extra",
-            "/etc/rc.d/init.d/.boot"
-        ]
-        
-        for path in suspicious_paths:
-            paths = glob.glob(path)
-            for found_path in paths:
-                if os.path.exists(found_path):
-                    self.add_finding(
-                        f"Found suspicious file/directory: {found_path}",
-                        AnalysisStatus.ERROR
-                    )
-        
-        # Check for suspicious kernel modules
-        returncode, stdout, _ = run_command(
-            "lsmod",
-            shell=True,
-            capture_output=True
-        )
-        
-        if returncode == 0 and stdout.strip():
-            modules_file = self.temp_dir / "kernel_modules.txt"
-            modules_file.write_text(stdout)
-            
-            # Known malicious module names (partial matches)
-            suspicious_modules = [
-                "hide", "sshrk", "rkit", "adore", "modhide", "ipsecs", "cleaner",
-                "synch", "kbeast", "diamorphine", "metasploit", "livesupport"
-            ]
-            
-            for module in suspicious_modules:
-                if any(module in line.lower() for line in stdout.splitlines()):
-                    self.add_finding(
-                        f"Found suspicious kernel module matching '{module}'",
-                        AnalysisStatus.ERROR
-                    )
-    
-    def _check_for_lkm_backdoors(self) -> None:
-        """Check for loadable kernel module backdoors."""
-        print_info("Checking for LKM backdoors...")
-        
-        # Check for syscall table modifications
-        if os.path.exists("/sys/kernel/debug/kprobes/blacklist"):
-            with open("/sys/kernel/debug/kprobes/blacklist", "r") as f:
-                content = f.read()
-                syscall_file = self.temp_dir / "syscall_blacklist.txt"
-                syscall_file.write_text(content)
-                
-                if content.strip():
-                    self.add_finding(
-                        "Found blacklisted kernel probes - potential syscall hooking",
-                        AnalysisStatus.WARNING
-                    )
-        
-        # Check for hidden kernel modules
-        returncode, stdout, _ = run_command(
-            "cat /proc/modules | wc -l",
-            shell=True,
-            capture_output=True
-        )
-        
-        if returncode == 0 and stdout.strip():
-            mod_count1 = int(stdout.strip())
-            
-            returncode, stdout, _ = run_command(
-                "lsmod | wc -l",
-                shell=True,
-                capture_output=True
-            )
-            
-            if returncode == 0 and stdout.strip():
-                # Subtract 1 for the header line in lsmod output
-                mod_count2 = int(stdout.strip()) - 1
-                
-                if mod_count1 != mod_count2:
-                    self.add_finding(
-                        f"Module count mismatch: /proc/modules ({mod_count1}) vs lsmod ({mod_count2})",
-                        AnalysisStatus.ERROR
-                    )
-    
-    def _check_for_file_integrity(self) -> None:
-        """Check critical system files for unexpected modifications."""
-        print_info("Checking critical file integrity...")
-        
-        # Critical system files to check
-        critical_files = [
-            "/bin/ls",
-            "/bin/ps",
-            "/bin/netstat",
-            "/bin/ss",
-            "/bin/lsof",
-            "/bin/find",
-            "/bin/grep",
-            "/sbin/ifconfig",
-            "/usr/bin/top",
-            "/usr/bin/pstree"
-        ]
-        
-        for file_path in critical_files:
-            if os.path.exists(file_path):
-                # Check for unusual file attributes
-                returncode, stdout, _ = run_command(
-                    f"lsattr {file_path}",
-                    shell=True,
-                    capture_output=True
-                )
-                
-                if returncode == 0 and stdout.strip():
-                    if 'i' in stdout:  # Immutable flag
-                        self.add_finding(
-                            f"Critical file has immutable flag: {file_path}",
-                            AnalysisStatus.WARNING
-                        )
-                
-                # Check file signature or checksum if package manager available
-                if command_exists("dpkg") or command_exists("rpm"):
-                    verify_cmd = ""
-                    if command_exists("dpkg"):
-                        verify_cmd = f"dpkg -V $(dpkg -S {file_path} | cut -d':' -f1)"
-                    elif command_exists("rpm"):
-                        verify_cmd = f"rpm -V $(rpm -qf {file_path})"
-                    
-                    if verify_cmd:
-                        returncode, stdout, _ = run_command(
-                            verify_cmd,
-                            shell=True,
-                            capture_output=True
-                        )
-                        
-                        if returncode != 0 and stdout.strip():
-                            self.add_finding(
-                                f"File integrity check failed for {file_path}: {stdout.strip()}",
-                                AnalysisStatus.ERROR
-                            )
-    
-    def _check_for_preload_backdoors(self) -> None:
-        """Check for LD_PRELOAD backdoors."""
-        print_info("Checking for LD_PRELOAD backdoors...")
-        
-        preload_files = [
-            "/etc/ld.so.preload",
-            "/etc/ld.so.conf.d/"
-        ]
-        
-        for path in preload_files:
-            if os.path.exists(path):
-                if os.path.isfile(path):
-                    with open(path, "r") as f:
-                        content = f.read()
-                    
-                    if content.strip():
-                        preload_file = self.temp_dir / os.path.basename(path)
-                        preload_file.write_text(content)
-                        
-                        # Check for suspicious libraries
-                        suspicious = False
-                        for line in content.splitlines():
-                            if line.strip() and not line.strip().startswith("#"):
-                                if "/tmp/" in line or "/dev/shm/" in line or "/var/tmp/" in line:
-                                    suspicious = True
-                        
-                        if suspicious:
-                            self.add_finding(
-                                f"Suspicious LD_PRELOAD configuration in {path}",
-                                AnalysisStatus.ERROR
-                            )
-                        else:
-                            self.add_finding(
-                                f"LD_PRELOAD configuration found in {path}",
-                                AnalysisStatus.WARNING
-                            )
-                elif os.path.isdir(path):
-                    conf_files = glob.glob(f"{path}/*.conf")
-                    for conf_file in conf_files:
-                        with open(conf_file, "r") as f:
-                            content = f.read()
-                        
-                        if "/tmp/" in content or "/dev/shm/" in content or "/var/tmp/" in content:
-                            self.add_finding(
-                                f"Suspicious library path in {conf_file}",
-                                AnalysisStatus.ERROR
-                            )
-    
-    def _check_for_cron_backdoors(self) -> None:
-        """Check for backdoors in cron jobs."""
-        print_info("Checking for cron backdoors...")
-        
-        cron_dirs = [
-            "/etc/cron.d/",
-            "/etc/cron.hourly/",
-            "/etc/cron.daily/",
-            "/etc/cron.weekly/",
-            "/etc/cron.monthly/"
-        ]
-        
-        cron_files = [
-            "/etc/crontab"
-        ]
-        
-        # Also check user crontabs
-        returncode, stdout, _ = run_command(
-            "cut -d':' -f1 /etc/passwd",
-            shell=True,
-            capture_output=True
-        )
-        
-        if returncode == 0 and stdout.strip():
-            for user in stdout.splitlines():
-                user_crontab = f"/var/spool/cron/crontabs/{user}"
-                if os.path.exists(user_crontab):
-                    cron_files.append(user_crontab)
-        
-        # Check all cron directories
-        for cron_dir in cron_dirs:
-            if os.path.exists(cron_dir) and os.path.isdir(cron_dir):
-                cron_files.extend(glob.glob(f"{cron_dir}/*"))
-        
-        # Suspicious patterns in cron jobs
-        suspicious_patterns = [
-            r"curl\s+.*\s+\|\s+bash",
-            r"wget\s+.*\s+\|\s+bash",
-            r"base64\s+--decode",
-            r"\/dev\/shm",
-            r"\/dev\/null\s+2>&1",
-            r"nc\s+-[el]",
-            r"python\s+-c",
-            r"perl\s+-e",
-            r"socat",
-            r"\.bash_history",
-            r"\.ssh\/authorized_keys"
-        ]
-        
-        for cron_file in cron_files:
-            if os.path.exists(cron_file) and os.path.isfile(cron_file):
-                try:
-                    with open(cron_file, "r") as f:
-                        content = f.read()
-                    
-                    if content.strip():
-                        cron_output = self.temp_dir / f"cron_{os.path.basename(cron_file)}.txt"
-                        cron_output.write_text(content)
-                        
-                        for pattern in suspicious_patterns:
-                            if re.search(pattern, content):
-                                self.add_finding(
-                                    f"Suspicious pattern '{pattern}' found in {cron_file}",
-                                    AnalysisStatus.ERROR
-                                )
-                except Exception as e:
-                    print_warning(f"Could not read cron file {cron_file}: {str(e)}")
-    
     def analyze(self) -> AnalysisStatus:
         """
-        Perform rootkit detection analysis.
+        Perform network traffic analysis.
         
         Returns:
             AnalysisStatus: Status of the analysis
         """
-        print_section("Rootkit Detection")
+        print_section("Network Traffic Analysis")
         
         if not self.check_requirements():
             self.add_finding(
-                "Rootkit detection requirements not met",
+                "Network analysis requirements not met",
                 AnalysisStatus.SKIPPED
             )
             return AnalysisStatus.SKIPPED
         
-        # Compare process listings
-        self._compare_ps_output()
+        # Capture network traffic
+        # self._capture_network_traffic()  # Not implemented yet
         
-        # Check for known rootkits
-        self._check_for_known_rootkits()
+        # Analyze current connections
+        self._analyze_connections()
         
-        # Check for LKM backdoors
-        self._check_for_lkm_backdoors()
+        # Analyze listening ports
+        self._analyze_listening_ports()
         
-        # Check file integrity
-        self._check_for_file_integrity()
+        # Analyze DNS configuration
+        self._analyze_dns_configuration()
         
-        # Check for preload backdoors
-        self._check_for_preload_backdoors()
-        
-        # Check for cron backdoors
-        self._check_for_cron_backdoors()
+        # Analyze captured traffic
+        self._analyze_captured_traffic()
         
         # Write report
-        self.report("Rootkit Detection")
+        self.report("Network Traffic Analysis")
         
         return self.status
 
@@ -985,7 +790,7 @@ class SecurityAnalyzer:
         if output_dir:
             self.output_dir = Path(output_dir)
         else:
-            timestamp = datetime.now().strftime("%Y%m%d_%
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     def _analyze_connections(self) -> None:
         """Analyze current network connections."""
@@ -1254,6 +1059,45 @@ class RootkitDetector(BaseAnalyzer):
             return False
         
         return True
+        
+    def analyze(self) -> AnalysisStatus:
+        """
+        Perform rootkit detection analysis.
+        
+        Returns:
+            AnalysisStatus: Status of the analysis
+        """
+        print_section("Rootkit Detection")
+        
+        if not self.check_requirements():
+            self.add_finding(
+                "Rootkit detection requirements not met",
+                AnalysisStatus.SKIPPED
+            )
+            return AnalysisStatus.SKIPPED
+        
+        # Compare process listings
+        self._compare_ps_output()
+        
+        # Check for known rootkits
+        self._check_for_known_rootkits()
+        
+        # Check for LKM backdoors
+        self._check_for_lkm_backdoors()
+        
+        # Check file integrity
+        self._check_for_file_integrity()
+        
+        # Check for preload backdoors
+        self._check_for_preload_backdoors()
+        
+        # Check for cron backdoors
+        self._check_for_cron_backdoors()
+        
+        # Write report
+        self.report("Rootkit Detection")
+        
+        return self.status
     
     def _compare_ps_output(self) -> None:
         """Compare output of different process listing commands to find hidden processes."""
@@ -1264,50 +1108,503 @@ class RootkitDetector(BaseAnalyzer):
             ("ps aux", "ps_aux.txt"),
             ("ps -ef", "ps_ef.txt"),
             ("/bin/ps aux", "bin_ps_aux.txt"),
-            ("ls -la /proc
-            bool: True if requirements are met, False otherwise
-        """
-        if not self.volatility_path:
-            print_warning("Volatility not found. Memory analysis will be limited.")
+            ("ls -la /proc", "proc_dir.txt")
+        ]
+        
+        # Store processes from each command
+        processes = {}
+        
+        for cmd, output_file in ps_cmds:
+            returncode, stdout, _ = run_command(
+                cmd,
+                shell=True,
+                capture_output=True,
+                timeout=10  # Add timeout to prevent hanging
+            )
             
-        return True  # We can still do basic memory analysis without volatility
+            if returncode == 0 and stdout.strip():
+                output_path = self.temp_dir / output_file
+                output_path.write_text(stdout)
+                
+                # Parse process IDs
+                pids = set()
+                if "ls -la" in cmd:
+                    # Parse PIDs from /proc directory listing
+                    for line in stdout.splitlines():
+                        try:
+                            parts = line.split()
+                            if len(parts) > 8:
+                                pid = parts[8]
+                                if pid.isdigit():
+                                    pids.add(pid)
+                        except (IndexError, ValueError):
+                            pass
+                else:
+                    # Parse PIDs from ps output
+                    for line in stdout.splitlines()[1:]:  # Skip header
+                        try:
+                            fields = line.split()
+                            if len(fields) > 1:
+                                pid = fields[1]
+                                if pid.isdigit():
+                                    pids.add(pid)
+                        except (IndexError, ValueError):
+                            pass
+                
+                processes[cmd] = pids
+        
+        # Find differences - potential hidden processes
+        if len(processes) > 1:
+            for cmd1, pids1 in processes.items():
+                for cmd2, pids2 in processes.items():
+                    if cmd1 != cmd2:
+                        # Find PIDs in cmd1 but not in cmd2
+                        hidden_candidates = pids1 - pids2
+                        
+                        # Verify processes still exist before reporting
+                        verified_hidden = []
+                        for pid in hidden_candidates:
+                            # Check if the process still exists in /proc
+                            if os.path.exists(f"/proc/{pid}"):
+                                # Double check the process is still running
+                                try:
+                                    # Try to get the process name as additional verification
+                                    with open(f"/proc/{pid}/comm", "r") as f:
+                                        proc_name = f.read().strip()
+                                    verified_hidden.append((pid, proc_name))
+                                except (IOError, FileNotFoundError):
+                                    # Process ended during our check, don't include it
+                                    pass
+                        
+                        if verified_hidden:
+                            # Format the output with process names for better context
+                            hidden_info = ", ".join([f"{pid} ({name})" for pid, name in verified_hidden])
+                            self.add_finding(
+                                f"Found {len(verified_hidden)} processes visible to '{cmd1}' but hidden from '{cmd2}': {hidden_info}",
+                                AnalysisStatus.ERROR
+                            )
     
-    def _create_memory_dump(self) -> bool:
-        """
-        Create a memory dump for analysis.
+    def _check_for_known_rootkits(self) -> None:
+        """Check for known rootkit files and signatures."""
+        print_info("Checking for known rootkit files and signatures...")
         
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        self.memory_dump = self.temp_dir / "memory.dmp"
-        print_info("Attempting to create memory dump...")
+        # Common rootkit files and directories
+        suspicious_paths = [
+            "/dev/.hidedrootkit",
+            "/dev/.hiddenroot",
+            "/dev/.udev",
+            "/dev/.ps",
+            "/dev/.pstree", 
+            "/dev/.lsof",
+            "/dev/.lsof",
+            "/dev/shm/.pulse", 
+            "/usr/share/.sshd",
+            "/usr/bin/.sshd",
+            "/lib/modules/*/extra",
+            "/etc/rc.d/init.d/.boot"
+        ]
         
-        # Try /dev/mem
-        if Path("/dev/mem").exists() and os.access("/dev/mem", os.R_OK):
-            print_info("Using /dev/mem for memory acquisition")
-            returncode, _, _ = run_command(
-                f"dd if=/dev/mem of={self.memory_dump} bs=1M count=1024",
+        for path in suspicious_paths:
+            paths = glob.glob(path)
+            for found_path in paths:
+                if os.path.exists(found_path):
+                    self.add_finding(
+                        f"Found suspicious file/directory: {found_path}",
+                        AnalysisStatus.ERROR
+                    )
+        
+        # Check for suspicious kernel modules
+        returncode, stdout, _ = run_command(
+            "lsmod",
+            shell=True,
+            capture_output=True
+        )
+        
+        if returncode == 0 and stdout.strip():
+            modules_file = self.temp_dir / "kernel_modules.txt"
+            modules_file.write_text(stdout)
+            
+            # Known malicious module names (partial matches)
+            suspicious_modules = [
+                "hide", "sshrk", "rkit", "adore", "modhide", "ipsecs", "cleaner",
+                "synch", "kbeast", "diamorphine", "metasploit", "livesupport"
+            ]
+            
+            for module in suspicious_modules:
+                if any(module in line.lower() for line in stdout.splitlines()):
+                    self.add_finding(
+                        f"Found suspicious kernel module matching '{module}'",
+                        AnalysisStatus.ERROR
+                    )
+    
+    def _check_for_lkm_backdoors(self) -> None:
+        """Check for loadable kernel module backdoors."""
+        print_info("Checking for LKM backdoors...")
+        
+        # Check for syscall table modifications
+        if os.path.exists("/sys/kernel/debug/kprobes/blacklist"):
+            with open("/sys/kernel/debug/kprobes/blacklist", "r") as f:
+                content = f.read()
+                syscall_file = self.temp_dir / "syscall_blacklist.txt"
+                syscall_file.write_text(content)
+                
+                if content.strip():
+                    self.add_finding(
+                        "Found blacklisted kernel probes - potential syscall hooking",
+                        AnalysisStatus.WARNING
+                    )
+        
+        # Check for hidden kernel modules
+        returncode, stdout, _ = run_command(
+            "cat /proc/modules | wc -l",
+            shell=True,
+            capture_output=True
+        )
+        
+        if returncode == 0 and stdout.strip():
+            mod_count1 = int(stdout.strip())
+            
+            returncode, stdout, _ = run_command(
+                "lsmod | wc -l",
                 shell=True,
                 capture_output=True
             )
-            if returncode == 0 and self.memory_dump.exists():
-                print_success(f"Created memory dump: {self.memory_dump}")
-                return True
+            
+            if returncode == 0 and stdout.strip():
+                # Subtract 1 for the header line in lsmod output
+                mod_count2 = int(stdout.strip()) - 1
+                
+                if mod_count1 != mod_count2:
+                    self.add_finding(
+                        f"Module count mismatch: /proc/modules ({mod_count1}) vs lsmod ({mod_count2})",
+                        AnalysisStatus.ERROR
+                    )
+    
+    def _check_for_file_integrity(self) -> None:
+        """Check critical system files for unexpected modifications."""
+        print_info("Checking critical file integrity...")
         
-        # Try /proc/kcore
-        if Path("/proc/kcore").exists() and os.access("/proc/kcore", os.R_OK):
-            print_info("Using /proc/kcore for memory acquisition")
-            returncode, _, _ = run_command(
-                f"dd if=/proc/kcore of={self.memory_dump} bs=1M count=1024",
-                shell=True,
-                capture_output=True
-            )
-            if returncode == 0 and self.memory_dump.exists():
-                print_success(f"Created memory dump: {self.memory_dump}")
-                return True
+        # Critical system files to check
+        critical_files = [
+            "/bin/ls",
+            "/bin/ps",
+            "/bin/netstat",
+            "/bin/ss",
+            "/bin/lsof",
+            "/bin/find",
+            "/bin/grep",
+            "/sbin/ifconfig",
+            "/usr/bin/top",
+            "/usr/bin/pstree"
+        ]
         
-        print_warning("Could not create memory dump. Limited memory analysis will be performed.")
-        return False
+        total_files = len(critical_files)
+        for idx, file_path in enumerate(critical_files):
+            # Show progress
+            print_info(f"Checking file {idx+1}/{total_files}: {file_path}")
+            
+            if not os.path.exists(file_path):
+                print_warning(f"File {file_path} does not exist, skipping.")
+                continue
+                
+            try:
+                # Check file permissions and ownership
+                file_stat = os.stat(file_path)
+                file_mode = file_stat.st_mode & 0o777
+                if file_mode & 0o022:  # World-writable check
+                    self.add_finding(
+                        f"Critical file has unsafe permissions: {file_path} (mode: {file_mode:o})",
+                        AnalysisStatus.ERROR
+                    )
+                
+                # Check for unusual file attributes with timeout
+                returncode, stdout, stderr = run_command(
+                    f"lsattr {file_path}",
+                    shell=True,
+                    capture_output=True,
+                    timeout=5  # 5 second timeout
+                )
+                
+                if returncode == 0 and stdout.strip():
+                    # Parse lsattr output correctly - immutable flag is shown as 'i' in attribute position
+                    # Format is typically: ----i------------ /path/to/file
+                    # The 'i' should be in position 4 (index 3) if immutable
+                    attributes = stdout.strip().split()[0]
+                    
+                    if len(attributes) > 3 and attributes[3] == 'i':
+                        self.add_finding(
+                            f"Critical file has immutable flag: {file_path}",
+                            AnalysisStatus.WARNING
+                        )
+                    elif 'i' in attributes:  # Check anywhere in the attribute string as fallback
+                        self.add_finding(
+                            f"Critical file may have immutable flag: {file_path} (attributes: {attributes})",
+                            AnalysisStatus.WARNING
+                        )
+                elif returncode == 124:  # Timeout error code
+                    print_warning(f"Timeout checking attributes for {file_path}")
+                
+                # Use more lightweight approach to check file integrity
+                integrity_issue_found = False
+                
+                # First, try a faster approach with basic commands
+                if command_exists("md5sum"):
+                    # Calculate current file hash
+                    hash_cmd = f"md5sum {file_path}"
+                    hash_returncode, hash_stdout, _ = run_command(
+                        hash_cmd,
+                        shell=True,
+                        capture_output=True,
+                        timeout=10
+                    )
+                    
+                    if hash_returncode == 0 and hash_stdout.strip():
+                        # Store hash for reporting
+                        current_hash = hash_stdout.strip().split()[0]
+                        
+                        # Store the hash for potential future verification
+                        hash_file = self.temp_dir / f"{os.path.basename(file_path)}.md5"
+                        hash_file.write_text(current_hash)
+                
+                # Now try package manager verification but with timeouts and better error handling
+                if command_exists("dpkg") or command_exists("rpm"):
+                    if command_exists("dpkg"):
+                        # First get the package name (with timeout)
+                        pkg_cmd = f"dpkg -S {file_path} | cut -d':' -f1"
+                        pkg_returncode, pkg_stdout, _ = run_command(
+                            pkg_cmd,
+                            shell=True,
+                            capture_output=True,
+                            timeout=10
+                        )
+                        
+                        if pkg_returncode == 0 and pkg_stdout.strip():
+                            package_name = pkg_stdout.strip()
+                            # Now verify only this specific file instead of the whole package
+                            verify_cmd = f"dpkg-query --verify {package_name} | grep {file_path}"
+                            verify_returncode, verify_stdout, _ = run_command(
+                                verify_cmd,
+                                shell=True,
+                                capture_output=True,
+                                timeout=15  # 15 second timeout
+                            )
+                            
+                            if verify_stdout.strip():
+                                integrity_issue_found = True
+                                self.add_finding(
+                                    f"Package verification failed for {file_path}: {verify_stdout.strip()}",
+                                    AnalysisStatus.ERROR
+                                )
+                            elif verify_returncode == 124:  # Timeout
+                                print_warning(f"Package verification timed out for {file_path}")
+                        elif pkg_returncode == 124:  # Timeout
+                            print_warning(f"Package lookup timed out for {file_path}")
+                    
+                    elif command_exists("rpm"):
+                        # Use a more targeted approach for RPM
+                        verify_cmd = f"rpm -V $(rpm -qf {file_path}) --nodeps --nodigest | grep {file_path}"
+                        verify_returncode, verify_stdout, _ = run_command(
+                            verify_cmd,
+                            shell=True,
+                            capture_output=True,
+                            timeout=15  # 15 second timeout
+                        )
+                        
+                        if verify_returncode == 0 and verify_stdout.strip():
+                            integrity_issue_found = True
+                            self.add_finding(
+                                f"Package verification failed for {file_path}: {verify_stdout.strip()}",
+                                AnalysisStatus.ERROR
+                            )
+                        elif verify_returncode == 124:  # Timeout
+                            print_warning(f"Package verification timed out for {file_path}")
+                
+                # If package verification didn't work or isn't available, 
+                # compare file size and modification time to expected values
+                # This is a simplistic check but better than nothing
+                if not integrity_issue_found and not command_exists("dpkg") and not command_exists("rpm"):
+                    # Expected sizes and permissions for common binaries could be defined here
+                    # For now, just report the current values
+                    size = os.path.getsize(file_path)
+                    mtime = os.path.getmtime(file_path)
+                    
+                    # Store these values for reporting
+                    file_info = self.temp_dir / f"{os.path.basename(file_path)}.info"
+                    file_info.write_text(f"Size: {size}\nMtime: {mtime}\nMode: {file_mode:o}")
+                    
+                    print_info(f"Recorded baseline for {file_path}: size={size}, mtime={mtime}")
+                    
+            except Exception as e:
+                print_error(f"Error checking file {file_path}: {str(e)}")
+                continue
+        
+        print_success("File integrity check completed")
+    
+    def _check_for_preload_backdoors(self) -> None:
+        """Check for LD_PRELOAD backdoors."""
+        print_info("Checking for LD_PRELOAD backdoors...")
+        
+        preload_files = [
+            "/etc/ld.so.preload",
+            "/etc/ld.so.conf.d/"
+        ]
+        
+        for path in preload_files:
+            if os.path.exists(path):
+                if os.path.isfile(path):
+                    with open(path, "r") as f:
+                        content = f.read()
+                    
+                    if content.strip():
+                        preload_file = self.temp_dir / os.path.basename(path)
+                        preload_file.write_text(content)
+                        
+                        # Check for suspicious libraries
+                        suspicious = False
+                        for line in content.splitlines():
+                            if line.strip() and not line.strip().startswith("#"):
+                                if "/tmp/" in line or "/dev/shm/" in line or "/var/tmp/" in line:
+                                    suspicious = True
+                        
+                        if suspicious:
+                            self.add_finding(
+                                f"Suspicious LD_PRELOAD configuration in {path}",
+                                AnalysisStatus.ERROR
+                            )
+                        else:
+                            self.add_finding(
+                                f"LD_PRELOAD configuration found in {path}",
+                                AnalysisStatus.WARNING
+                            )
+                elif os.path.isdir(path):
+                    conf_files = glob.glob(f"{path}/*.conf")
+                    for conf_file in conf_files:
+                        with open(conf_file, "r") as f:
+                            content = f.read()
+                        
+                        if "/tmp/" in content or "/dev/shm/" in content or "/var/tmp/" in content:
+                            self.add_finding(
+                                f"Suspicious library path in {conf_file}",
+                                AnalysisStatus.ERROR
+                            )
+
+    
+    def _check_for_cron_backdoors(self) -> None:
+        """Check for backdoors in cron jobs."""
+        print_info("Checking for cron backdoors...")
+        
+        cron_dirs = [
+            "/etc/cron.d/",
+            "/etc/cron.hourly/",
+            "/etc/cron.daily/",
+            "/etc/cron.weekly/",
+            "/etc/cron.monthly/"
+        ]
+        
+        cron_files = [
+            "/etc/crontab"
+        ]
+        
+        # Also check user crontabs
+        returncode, stdout, _ = run_command(
+            "cut -d':' -f1 /etc/passwd",
+            shell=True,
+            capture_output=True
+        )
+        
+        if returncode == 0 and stdout.strip():
+            for user in stdout.splitlines():
+                user_crontab = f"/var/spool/cron/crontabs/{user}"
+                if os.path.exists(user_crontab):
+                    cron_files.append(user_crontab)
+        
+        # Check all cron directories
+        for cron_dir in cron_dirs:
+            if os.path.exists(cron_dir) and os.path.isdir(cron_dir):
+                cron_files.extend(glob.glob(f"{cron_dir}/*"))
+        
+        # Suspicious patterns in cron jobs
+        suspicious_patterns = [
+            # Command execution via piped download - high risk
+            r"curl\s+.*\s+\|\s*sh",
+            r"curl\s+.*\s+\|\s*bash",
+            r"wget\s+.*\s+\|\s*sh",
+            r"wget\s+.*\s+\|\s*bash",
+            # Encoded commands - high risk
+            r"base64\s+--decode.*\|\s*bash",
+            r"echo.*\s+\|\s*base64\s+--decode\s+\|\s*bash",
+            # Suspicious locations - moderate risk
+            r"\/dev\/shm\/.*\.sh",
+            r"\/tmp\/.*\.sh",
+            # Network tools with potential for reverse shells - high risk
+            r"nc\s+-[el].*[0-9]+",
+            r"netcat\s+-[el].*[0-9]+",
+            # One-liner code execution - moderate risk
+            r"python\s+-c\s+[\"\'].*socket|subprocess|pty\.spawn",
+            r"perl\s+-e\s+[\"\'].*socket|exec\s+[\"\']",
+            r"ruby\s+-e\s+[\"\'].*socket|exec\s+[\"\']",
+            # Network tools - moderate risk
+            r"socat\s+.*\s+exec:",
+            # Sensitive file modifications - moderate risk
+            r">\s*\.bash_history",
+            r">>\s*\.ssh\/authorized_keys"
+        ]
+        
+        # Whitelist patterns for common legitimate system scripts
+        whitelist_patterns = [
+            r"if\s+.*which\s+on_ac_power\s+.*>\s*\/dev\/null",
+            r"on_ac_power\s+>\s*\/dev\/null",
+            r"test\s+.*>\s*\/dev\/null",
+            r"command\s+-v\s+.*>\s*\/dev\/null",
+            r"type\s+.*>\s*\/dev\/null",
+            r"find\s+.*>\s*\/dev\/null",
+            r"grep\s+.*>\s*\/dev\/null",
+            r">\s*\/dev\/null\s+2>&1\s*$"  # Common at end of legitimate commands
+        ]
+        
+        for cron_file in cron_files:
+            if os.path.exists(cron_file) and os.path.isfile(cron_file):
+                try:
+                    with open(cron_file, "r") as f:
+                        content = f.read()
+                    
+                    if content.strip():
+                        cron_output = self.temp_dir / f"cron_{os.path.basename(cron_file)}.txt"
+                        cron_output.write_text(content)
+                        
+                        for pattern in suspicious_patterns:
+                            if re.search(pattern, content):
+                                # Check if the match is a false positive by comparing against whitelist
+                                match_line = ""
+                                for line in content.splitlines():
+                                    if re.search(pattern, line):
+                                        match_line = line
+                                        break
+                                
+                                # Skip if the matching line matches a whitelist pattern
+                                is_whitelisted = False
+                                for whitelist_pattern in whitelist_patterns:
+                                    if re.search(whitelist_pattern, match_line):
+                                        is_whitelisted = True
+                                        break
+                                
+                                # Only report if not whitelisted
+                                if not is_whitelisted:
+                                    # Check if this is a system file
+                                    is_system_file = any(path in cron_file for path in [
+                                        "/etc/cron.d", "/etc/cron.daily", 
+                                        "/etc/cron.hourly", "/etc/cron.monthly", 
+                                        "/etc/cron.weekly"
+                                    ])
+                                    
+                                    status = AnalysisStatus.WARNING if is_system_file else AnalysisStatus.ERROR
+                                    
+                                    self.add_finding(
+                                        f"Suspicious pattern '{pattern}' found in {cron_file} (line: {match_line.strip()})",
+                                        status
+                                    )
+                except Exception as e:
+                    print_warning(f"Could not read cron file {cron_file}: {str(e)}")
     
     def _analyze_memory_strings(self) -> None:
         """Analyze strings in memory for suspicious patterns."""

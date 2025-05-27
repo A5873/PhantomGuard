@@ -10,7 +10,7 @@ pyyaml>=6.0.0
 tqdm>=4.64.0
 
 # System security analysis
-procfs>=0.7.1
+# procfs>=0.7.1
 pyudev>=0.24.0
 
 # Network analysis dependencies
