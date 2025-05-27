@@ -44,8 +44,8 @@ See [RUST.md](RUST.md) for details on the Rust implementation plans.
 
 ```bash
 # Clone the repository
-git clone https://github.com/A5873/phantomguard.git
-cd phantomguard
+git clone https://github.com/A5873/PhantomGuard.git
+cd PhantomGuard
 
 # Create a virtual environment (optional but recommended)
 python -m venv venv
