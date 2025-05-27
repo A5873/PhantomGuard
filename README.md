@@ -27,6 +27,7 @@ PhantomGuard is a powerful security analysis toolkit that combines advanced root
 - **Real-time System Monitoring**: Continuous monitoring with customizable alerting and automated response capabilities
 - **Multi-platform Support**: Compatible with Linux, macOS, and Windows environments
 - **Performance Optimization**: Configurable resource usage with Rust-accelerated components for high-performance environments
+- **Dual Implementation**: Core functionality in Python with complementary shell scripts for Linux system analysis and standalone operation
 
 ## Implementation
 
@@ -43,7 +44,7 @@ See [RUST.md](RUST.md) for details on the Rust implementation plans.
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/phantomguard.git
+git clone https://github.com/A5873/phantomguard.git
 cd phantomguard
 
 # Create a virtual environment (optional but recommended)
@@ -68,6 +69,79 @@ phantomguard container-scan
 
 # Memory analysis
 phantomguard memory-scan
+```
+
+## Shell Scripts
+
+PhantomGuard includes powerful standalone shell scripts for Linux systems that can be used independently or in conjunction with the Python library:
+
+### Advanced Security Analyzer
+
+```bash
+# Run a comprehensive security analysis
+sudo ./advanced_security_analyzer.sh --all
+
+# Run only specific security checks
+sudo ./advanced_security_analyzer.sh --memory --rootkit
+```
+
+The Advanced Security Analyzer provides deep security analysis capabilities:
+- Memory forensics and runtime process analysis
+- Advanced rootkit detection techniques
+- Network traffic monitoring and analysis
+- Container security scanning
+- Custom malware signature detection
+
+### System Security Checker
+
+```bash
+# Run a complete system security check
+sudo ./system_security_checker.sh
+```
+
+The System Security Checker performs these critical security checks:
+- Detection of suspicious processes and hidden services
+- Network connection analysis and anomaly detection
+- System file integrity verification
+- Rootkit indicators and backdoor detection
+- Suspicious cron job identification
+- SUID/SGID binary analysis
+- Log file analysis for security events
+
+### System Vulnerability Scanner
+
+```bash
+# Run a vulnerability scan with all checks
+sudo ./system_vulnerability_scanner.sh --full
+
+# Focus only on specific vulnerability types
+sudo ./system_vulnerability_scanner.sh --web --cve
+```
+
+The System Vulnerability Scanner includes:
+- CVE checking for the OS and installed packages
+- Hardware vulnerability and bug detection
+- Web application and server configuration analysis
+- System information gathering and security assessment
+
+### Integration with Python Library
+
+The shell scripts can be used in different ways alongside the Python library:
+
+1. **Standalone Mode**: Use the scripts directly for quick analysis without installing the full Python package
+2. **Complementary Mode**: Run specific shell script capabilities alongside Python analysis
+3. **Hybrid Operation**: Call the shell scripts from the Python library for extended functionality:
+
+```python
+from phantomguard import ShellIntegration
+
+# Run the advanced security analyzer from Python
+shell_integration = ShellIntegration()
+results = shell_integration.run_advanced_analysis(memory=True, rootkit=True)
+
+# Process the results in Python
+for finding in results.critical_findings:
+    print(f"Critical security issue: {finding.description}")
 ```
 
 ## Documentation
